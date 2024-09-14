@@ -1,3 +1,4 @@
+using DotNet8WebApi.TwilioExample.Dependencies;
 using Hangfire;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +9,8 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddDependencyInjection(builder);
 
 var app = builder.Build();
 

@@ -1,5 +1,7 @@
-﻿using DotNet8WebApi.TwilioExample.Services.SmsService;
+﻿using DotNet8WebApi.TwilioExample.Services.SetupService;
+using DotNet8WebApi.TwilioExample.Services.SmsService;
 using Hangfire;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNet8WebApi.TwilioExample.Dependencies
 {
@@ -12,7 +14,7 @@ namespace DotNet8WebApi.TwilioExample.Dependencies
 
         private static IServiceCollection AddServices(this IServiceCollection services)
         {
-            return services.AddScoped<ISmsService, SmsService>();
+            return services.AddScoped<ISmsService, SmsService>().AddScoped<ISetupService, SetupService>();
         }
 
         private static IServiceCollection AddHangfireService(
