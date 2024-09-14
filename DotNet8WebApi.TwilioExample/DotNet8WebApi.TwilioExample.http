@@ -1,0 +1,6 @@
+@DotNet8WebApi.TwilioExample_HostAddress = http://localhost:5252
+
+GET {{DotNet8WebApi.TwilioExample_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
