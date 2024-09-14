@@ -6,9 +6,9 @@ using Hangfire;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
-using Twilio.Types;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
+using Twilio.Types;
 
 namespace DotNet8WebApi.TwilioExample.Features.Auth.Register
 {
@@ -23,13 +23,19 @@ namespace DotNet8WebApi.TwilioExample.Features.Auth.Register
             _configuration = configuration;
         }
 
-        public async Task<Result<AuthDTO>> Handle(RegisterCommand request, CancellationToken cancellationToken)
+        public async Task<Result<AuthDTO>> Handle(
+            RegisterCommand request,
+            CancellationToken cancellationToken
+        )
         {
             Result<AuthDTO> result;
             var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
             try
             {
-                bool phoneDuplicate = await _context.Tbl_Users.AnyAsync(x => x.PhoneNumber == request.RegisterRequest.PhoneNumber && !x.DeleteFlag, cancellationToken: cancellationToken);
+                bool phoneDuplicate = await _context.Tbl_Users.AnyAsync(
+                    x => x.PhoneNumber == request.RegisterRequest.PhoneNumber && !x.DeleteFlag,
+                    cancellationToken: cancellationToken
+                );
                 if (phoneDuplicate)
                 {
                     result = Result<AuthDTO>.Duplicate("Phone Number already exists.");
@@ -49,9 +55,12 @@ namespace DotNet8WebApi.TwilioExample.Features.Auth.Register
                 };
                 await _context.Tbl_Setups.AddAsync(setup, cancellationToken);
 
-                BackgroundJob.Schedule<ISetupService>(x => x.ExpireOtp(setup.SetupId, cancellationToken), TimeSpan.FromMinutes(1));
+                BackgroundJob.Schedule<ISetupService>(
+                    x => x.ExpireOtp(setup.SetupId, cancellationToken),
+                    TimeSpan.FromMinutes(1)
+                );
 
-                SendOtpViaSms(user.PhoneNumber);
+                SendOtpViaSms(user, eightDigit);
 
                 await _context.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
@@ -63,7 +72,7 @@ namespace DotNet8WebApi.TwilioExample.Features.Auth.Register
                 result = Result<AuthDTO>.Fail(ex);
             }
 
-        result:
+            result:
             return result;
         }
 
@@ -74,7 +83,7 @@ namespace DotNet8WebApi.TwilioExample.Features.Auth.Register
             return randNum.ToString();
         }
 
-        private void SendOtpViaSms(string phone)
+        private void SendOtpViaSms(Tbl_User tbl_User, string otp)
         {
             var accountSid = _configuration.GetSection("AccountSid").Value!;
             var authToken = _configuration.GetSection("AuthToken").Value!;
@@ -82,11 +91,11 @@ namespace DotNet8WebApi.TwilioExample.Features.Auth.Register
 
             //var messageOptions = new CreateMessageOptions(
             //  new PhoneNumber("+959773871112"));
-            var messageOptions = new CreateMessageOptions(
-              new PhoneNumber(phone));
+            var messageOptions = new CreateMessageOptions(new PhoneNumber(tbl_User.PhoneNumber));
             messageOptions.From = new PhoneNumber("+12073062974");
-            messageOptions.Body = "Hello from Twilio";
-
+            messageOptions.Body =
+                $@"Dear {tbl_User.UserName}, Here is your OTP: {otp}. 
+This code will be expired in next 1 minute.";
 
             var message = MessageResource.Create(messageOptions);
             Console.WriteLine(message.Body);

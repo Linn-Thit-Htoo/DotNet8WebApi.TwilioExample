@@ -1,4 +1,5 @@
 ﻿using DotNet8WebApi.TwilioExample.Db;
+using DotNet8WebApi.TwilioExample.Services;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +11,7 @@ namespace DotNet8WebApi.TwilioExample.Dependencies
     {
         public static IServiceCollection AddDependencyInjection(this IServiceCollection services, WebApplicationBuilder builder)
         {
-            return services.AddServices().AddHangfireService(builder);
+            return services.AddDbContextService(builder).AddServices().AddHangfireService(builder).AddMediatRService();
         }
 
         private static IServiceCollection AddDbContextService(this IServiceCollection services, WebApplicationBuilder builder)
@@ -26,7 +27,7 @@ namespace DotNet8WebApi.TwilioExample.Dependencies
 
         private static IServiceCollection AddServices(this IServiceCollection services)
         {
-            return services;
+            return services.AddScoped<ISetupService, SetupService>();
         }
 
         private static IServiceCollection AddHangfireService(
@@ -44,6 +45,13 @@ namespace DotNet8WebApi.TwilioExample.Dependencies
 
             builder.Services.AddHangfireServer();
             return services;
+        }
+
+        private static IServiceCollection AddMediatRService(this IServiceCollection services)
+        {
+            return services.AddMediatR(cf =>
+                cf.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly)
+            );
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using DotNet8WebApi.TwilioExample.Db;
 using DotNet8WebApi.TwilioExample.Entities;
-using DotNet8WebApi.TwilioExample.Features.Setup;
 
 namespace DotNet8WebApi.TwilioExample.Services
 {
