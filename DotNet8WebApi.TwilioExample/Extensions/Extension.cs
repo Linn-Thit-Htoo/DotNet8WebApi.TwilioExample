@@ -16,16 +16,5 @@ namespace DotNet8WebApi.TwilioExample.Extensions
                 DeleteFlag = false
             };
         }
-
-        public static Tbl_Setup ToEntity(string userId, string otp)
-        {
-            return new Tbl_Setup
-            {
-                SetupId = Ulid.NewUlid().ToString(),
-                UserId = userId,
-                OtpCode = otp,
-                CreatedDate = DateTime.Now
-            };
-        }
     }
 }
