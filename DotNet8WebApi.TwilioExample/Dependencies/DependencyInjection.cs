@@ -1,5 +1,8 @@
-﻿using Hangfire;
+﻿using DotNet8WebApi.TwilioExample.Db;
+using Hangfire;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Data.Common;
 
 namespace DotNet8WebApi.TwilioExample.Dependencies
 {
@@ -8,6 +11,17 @@ namespace DotNet8WebApi.TwilioExample.Dependencies
         public static IServiceCollection AddDependencyInjection(this IServiceCollection services, WebApplicationBuilder builder)
         {
             return services.AddServices().AddHangfireService(builder);
+        }
+
+        private static IServiceCollection AddDbContextService(this IServiceCollection services, WebApplicationBuilder builder)
+        {
+            builder.Services.AddDbContext<AppDbContext>(opt =>
+            {
+                opt.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"));
+                opt.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            }, ServiceLifetime.Transient, ServiceLifetime.Transient);
+
+            return services;
         }
 
         private static IServiceCollection AddServices(this IServiceCollection services)
